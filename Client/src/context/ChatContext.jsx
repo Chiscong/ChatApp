@@ -17,7 +17,8 @@ export const ChatContextProvider = ({children, user}) => {
     const [newMessage, setNewMessage] = useState(null);
     const [socket, setSocket] = useState(null);
     const [onlineUsers, setOnlineUsers] = useState([]);
-    console.log("onlineUser", onlineUsers);
+    const [notifications, setNotifications] = useState([]);
+    const [allUser, setAllUser] = useState([]);
 
     useEffect(() => {
         const newSocket = io("http://localhost:3000");
@@ -28,34 +29,51 @@ export const ChatContextProvider = ({children, user}) => {
     }, [user]);
 
     useEffect(() => {
-        if (socket === null) return ;
-            socket.emit("addNewUser", user?._id);
-            socket.on("getOnlineUsers", (res) => {
-                setOnlineUsers(res);
-            });
+        if (socket === null) return;
+        socket.emit("addNewUser", user?._id);
+        socket.on("getOnlineUsers", (res) => {
+            setOnlineUsers(res);
+        });
         return () => {
             socket.off("getOnlineUsers");
         };
     }, [socket]);
-// send message
-useEffect(() => {
-    if (socket === null) return ;
-    const recipientId = currentChat?.members?.find((id) => id !== user?._id);
-    socket.emit("sendMessage",{...newMessage,recipientId})  ;
-}, [newMessage]);
-// receive message
-useEffect(() => {
-    if (socket === null) return ;
-    socket.on("getMessage",res=>{
-        if(currentChat?._id === res.chatID) return 
-        setMessages((prev)=>[...prev,res]);
-    });
-    return () => {
-        socket.off("getMessage");
-    };
-}, [socket,currentChat]);
 
-// -----------------------
+    // send message
+    useEffect(() => {
+        if (socket === null) return;
+        const recipientId = currentChat?.members?.find((id) => id !== user?._id);
+        socket.emit("sendMessage", {...newMessage, recipientId});
+    }, [newMessage]);
+
+    // receive message and notification
+    useEffect(() => {
+        if (socket === null) return;
+        
+        socket.on("getMessage", (res) => {
+            if (currentChat?._id === res.chatID) return;
+            setMessages((prev) => [...prev, res]);
+        });
+
+        socket.on("getNotification", (res) => {
+            console.log("Received notification:", res);
+            const isChatOpen = currentChat?._id === res.chatID;
+            
+            setNotifications((prev) => {
+                const newNotification = {
+                    ...res,
+                    isRead: isChatOpen
+                };
+                return [newNotification, ...prev];
+            });
+        });
+
+        return () => {
+            socket.off("getMessage");
+            socket.off("getNotification");
+        };
+    }, [socket, currentChat]);
+
     useEffect(()=>
     {
         const getUser = async ()=>
@@ -79,6 +97,7 @@ useEffect(() => {
                     return !isChatCreated;
                 });
                 setPotentialChats(pChats);
+                setAllUser(response);
             };
          
         getUser();
@@ -182,6 +201,9 @@ const sendMessage = async (text, chatId, senderId) => {
         currentChat,
         sendMessage,
         onlineUsers,
+        notifications,
+        allUser,
+      
     }}>
         {children}
     </ChatContext.Provider>

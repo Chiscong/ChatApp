@@ -209,3 +209,69 @@ body {
   align-items: center;
   justify-content: center;
 }
+
+/* Chat Input with Emoji */
+.chat-input-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 1rem;
+    background: rgb(30, 30, 30);
+}
+
+.chat-input {
+    flex: 1;
+    background: rgb(30, 30, 30);
+    padding: 1rem;
+}
+
+.chat-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.emoji-picker-container {
+    position: relative;
+    display: inline-block;
+}
+
+.emoji-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+    color: white;
+}
+
+.emoji-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.emoji-picker-wrapper {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    margin-bottom: 10px;
+    z-index: 1000;
+}
+
+.send-btn {
+    border: none;
+    background: rgba(72, 112, 223, 1);
+    color: white;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.send-btn:hover {
+    background: rgba(72, 112, 223, 0.8);
+}

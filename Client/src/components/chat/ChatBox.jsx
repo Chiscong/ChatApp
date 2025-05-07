@@ -4,6 +4,7 @@ import { ChatContext } from '../../context/ChatContext';
 import { useFetchRecipientUser } from './../../hooks/useFetchRecipient';
 import { Stack, Form, Button } from 'react-bootstrap';
 import './ChatBox.css';
+import EmojiPicker from "./EmojiPicker";
 
 const ChatBox = () => { 
     const { user } = useContext(AuthContext);
@@ -11,15 +12,12 @@ const ChatBox = () => {
     const { recipientUser, isLoading } = useFetchRecipientUser(currentChat, user);
     const [newMessage, setNewMessage] = useState("");
     const messagesEndRef = useRef(null);
+    const scrollRef = useRef();
 
     // Auto scroll to bottom when messages change
     useEffect(() => {
-        scrollToBottom();
+        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
 
     const formatTime = (timestamp) => {
         const date = new Date(timestamp);
@@ -30,20 +28,15 @@ const ChatBox = () => {
         });
     };
 
-    // Debug logs
-    console.log("Current User ID:", user?._id);
-    console.log("Messages:", messages);
-    console.log("Current Chat:", currentChat);
-
     if (isLoading || isMessagesLoading) {
         return <p>Loading chat...</p>;
     }
 
     if (!currentChat) {
         return (
-            <p style={{ textAlign: "center", width: "100%" }}>
-                No conversation selected yet...
-            </p>
+            <div className="chat-box d-flex align-items-center justify-content-center">
+                <p className="text-center">Open a conversation to start chatting</p>
+            </div>
         );
     }
 
@@ -62,10 +55,13 @@ const ChatBox = () => {
         try {
             await sendMessage(newMessage, currentChat._id, user._id);
             setNewMessage("");
-            scrollToBottom();
         } catch (error) {
             console.error("Error sending message:", error);
         }
+    };
+
+    const handleEmojiSelect = (emoji) => {
+        setNewMessage(prev => prev + emoji);
     };
 
     return (
@@ -77,18 +73,9 @@ const ChatBox = () => {
                 {messages && messages.length > 0 ? (
                     messages.map((message, index) => {
                         const isCurrentUserMessage = message.senderID === user?._id;
-                        
-                        console.log(`Message ${index}:`, {
-                            messageId: message._id,
-                            senderID: message.senderID,
-                            currentUserId: user?._id,
-                            isCurrentUserMessage,
-                            text: message.text,
-                            messageData: message
-                        });
-                        
                         return (
                             <div 
+                                ref={scrollRef}
                                 key={message._id || index} 
                                 className={`message-wrapper ${isCurrentUserMessage ? 'sent' : 'received'}`}
                             >
@@ -108,21 +95,24 @@ const ChatBox = () => {
                 )}
                 <div ref={messagesEndRef} />
             </div>
-            <Form onSubmit={handleSendMessage} className="chat-input">
-                <Stack direction="horizontal" gap={2}>
+            <div className="chat-input-container">
+                <Form onSubmit={handleSendMessage} className="chat-input">
                     <Form.Control
                         type="text"
                         placeholder="Type a message..."
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                     />
+                </Form>
+                <div className="chat-actions">
+                    <EmojiPicker onEmojiSelect={handleEmojiSelect} />
                     <Button type="submit" className="send-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                             <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
                         </svg>
                     </Button>
-                </Stack>
-            </Form>
+                </div>
+            </div>
         </Stack>
     );
 };

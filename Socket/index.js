@@ -20,6 +20,13 @@ socket.on("sendMessage",(message)=>
     if(user)
     {
         io.to(user.socketId).emit("getMessage",message);
+        io.to(user.socketId).emit("getNotification",{
+          senderID:message.senderID,
+          isRead:false,
+          date:new Date(),
+          chatID: message.chatID
+        });
+
     }
 }
 )

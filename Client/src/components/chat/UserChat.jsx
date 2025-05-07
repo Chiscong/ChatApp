@@ -7,8 +7,11 @@ import PropTypes from 'prop-types';
 
 const UserChat = ({ chat, user }) => {
   const { recipientUser } = useFetchRecipientUser(chat, user);
-  const { onlineUsers } = useContext(ChatContext);
+  const { onlineUsers, notifications = [] } = useContext(ChatContext);
   const isOnline = onlineUsers?.some((user) => user?.userId === recipientUser?._id);
+  
+  const unreadCount = notifications.filter(n => !n.isRead && n.chatID === chat._id).length;
+
   return (
     <Stack
       direction="horizontal"
@@ -29,16 +32,18 @@ const UserChat = ({ chat, user }) => {
         <div className="date">
          12/12/2021
         </div>
-        <div className="this-user-notifications">2</div>
-        <span className={isOnline ?"user-online":""}></span>
+        {unreadCount > 0 && (
+          <div className="this-user-notifications">{unreadCount}</div>
+        )}
+        <span className={isOnline ? "user-online" : ""}></span>
       </div>
     </Stack>
   );
 };
+
 UserChat.propTypes = {
   chat: PropTypes.object.isRequired,
   user: PropTypes.object.isRequired,
 };
-
 
 export default UserChat;
