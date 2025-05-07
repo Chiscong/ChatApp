@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { ChatContext } from "../../context/ChatContext";
 import { AuthContext } from "../../context/AuthContext";
 import { unReadNotificationsFunc } from "../../utils/unReadnatifications";
@@ -9,8 +9,11 @@ const Notification = () => {
     const {user} = useContext(AuthContext);
     const {notifications = [], userChats, allUser, setNotifications} = useContext(ChatContext);
     
-    // Ensure notifications is an array before processing
-    const unReadNotifications = unReadNotificationsFunc(notifications || [], userChats, allUser);
+    useEffect(() => {
+        console.log("Current notifications:", notifications);
+    }, [notifications]);
+    
+    const unReadNotifications = unReadNotificationsFunc(notifications, userChats, allUser);
     
     const modifiedNotifications = (notifications || []).map((n) => {
         const sender = allUser?.find(user => user._id === n.senderID);
