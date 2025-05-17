@@ -1,6 +1,12 @@
 const { Server } = require("socket.io");
+require("dotenv").config();
 
-const io = new Server({ cors: { origin: "http://localhost:5173" } });
+const io = new Server({ 
+  cors: { 
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    methods: ["GET", "POST"]
+  } 
+});
 let onlineUsers = [];
 
 io.on("connection", (socket) => {
@@ -49,4 +55,6 @@ io.on("connection", (socket) => {
     });
 });
 
-io.listen(3000);
+const PORT = process.env.SOCKET_PORT || 3000;
+io.listen(PORT);
+console.log(`Socket.io server running on port ${PORT}`);
