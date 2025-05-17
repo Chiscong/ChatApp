@@ -3,7 +3,8 @@ import { AuthContext } from '../../context/AuthContext';
 import { ChatContext } from '../../context/ChatContext';
 import { useFetchRecipientUser } from './../../hooks/useFetchRecipient';
 import { Stack, Form, Button } from 'react-bootstrap';
-import './ChatBox.css';
+
+
 import EmojiPicker from "./EmojiPicker";
 
 const ChatBox = () => { 
@@ -14,7 +15,7 @@ const ChatBox = () => {
     const messagesEndRef = useRef(null);
     const scrollRef = useRef();
 
-    // Auto scroll to bottom when messages change
+   
     useEffect(() => {
         scrollRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
@@ -34,7 +35,7 @@ const ChatBox = () => {
 
     if (!currentChat) {
         return (
-            <div className="chat-box d-flex align-items-center justify-content-center">
+            <div className="text-content ">
                 <p className="text-center">Open a conversation to start chatting</p>
             </div>
         );

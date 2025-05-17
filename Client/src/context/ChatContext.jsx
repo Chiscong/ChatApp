@@ -73,37 +73,25 @@ export const ChatContextProvider = ({children, user}) => {
             console.log("Received message:", res);
             if (currentChat?._id === res.chatID) {
                 setMessages((prev) => [...prev, res]);
+            } else {
+                // Add notification for new message
+                setNotifications((prev) => [...prev, { ...res, isRead: false }]);
             }
-        });
-
-        socket.on("getNotification", (res) => {
-            console.log("Received notification:", res);
-            
-            setNotifications((prev) => {
-                // Check if notification already exists
-                const exists = prev.some(n => 
-                    n.senderID === res.senderID && 
-                    n.chatID === res.chatID && 
-                    new Date(n.date).getTime() === new Date(res.date).getTime()
-                );
-                
-                if (exists) return prev;
-
-                const newNotification = {
-                    ...res,
-                    isRead: currentChat?._id === res.chatID
-                };
-                
-                console.log("Adding new notification:", newNotification);
-                return [newNotification, ...prev];
-            });
         });
 
         return () => {
             socket.off("getMessage");
-            socket.off("getNotification");
         };
     }, [socket, currentChat]);
+
+    // Mark notifications as read when opening a chat
+    useEffect(() => {
+        if (currentChat) {
+            setNotifications((prev) =>
+                prev.filter((notification) => notification.chatID !== currentChat._id)
+            );
+        }
+    }, [currentChat]);
 
     // Fetch potential chats and users
     useEffect(() => {
@@ -116,14 +104,7 @@ export const ChatContextProvider = ({children, user}) => {
 
             const pChats = response?.filter((u) => {
                 if (user?._id === u._id) return false;
-
-                let isChatCreated = false;
-                if (userChats) {
-                    isChatCreated = userChats?.some((chat) => {
-                        return chat.members[0] === u._id || chat.members[1] === u._id;
-                    });
-                }
-                return !isChatCreated;
+                return !userChats?.some((chat) => chat.members.includes(u._id));
             });
 
             setPotentialChats(pChats);
@@ -131,7 +112,7 @@ export const ChatContextProvider = ({children, user}) => {
         };
 
         getUser();
-    }, [userChats, user]);
+    }, [user, userChats]);
 
     // Fetch user chats
     useEffect(() => {
@@ -243,8 +224,7 @@ export const ChatContextProvider = ({children, user}) => {
             sendMessage,
             onlineUsers,
             notifications,
-            allUser,
-            setNotifications
+            allUser
         }}>
             {children}
         </ChatContext.Provider>

@@ -5,12 +5,41 @@ import { ChatContext } from "../../context/ChatContext";
 import avatar from "../../assets/avatar.svg";
 import PropTypes from 'prop-types';
 
+
 const UserChat = ({ chat, user }) => {
   const { recipientUser } = useFetchRecipientUser(chat, user);
   const { onlineUsers, notifications = [] } = useContext(ChatContext);
   const isOnline = onlineUsers?.some((user) => user?.userId === recipientUser?._id);
   
   const unreadCount = notifications.filter(n => !n.isRead && n.chatID === chat._id).length;
+
+  const formatDate = (date) => {
+    const now = new Date();
+    const messageDate = new Date(date);
+    
+    // Nếu là ngày hôm nay
+    if (messageDate.toDateString() === now.toDateString()) {
+      return messageDate.toLocaleTimeString('vi-VN', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false 
+      });
+    }
+    
+    // Nếu là ngày trong tuần này
+    const diffDays = Math.floor((now - messageDate) / (1000 * 60 * 60 * 24));
+    if (diffDays < 7) {
+      const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Chủ nhật'];
+      return days[messageDate.getDay()];
+    }
+    
+    // Nếu là ngày khác
+    return messageDate.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit'
+    });
+  };
 
   return (
     <Stack
@@ -30,7 +59,7 @@ const UserChat = ({ chat, user }) => {
       </div>
       <div className="d-flex flex-column align-items-end">
         <div className="date">
-         12/12/2021
+          {formatDate(chat.updatedAt)}
         </div>
         {unreadCount > 0 && (
           <div className="this-user-notifications">{unreadCount}</div>
