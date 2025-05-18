@@ -3,7 +3,7 @@ require("dotenv").config();
 
 const io = new Server({ 
   cors: { 
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: process.env.CLIENT_URL || "http://35.78.82.127",
     methods: ["GET", "POST"]
   } 
 });

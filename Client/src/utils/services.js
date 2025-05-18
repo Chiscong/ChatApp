@@ -1,4 +1,4 @@
-export const baseUrl = "http://localhost:5000/api";
+export const baseUrl = "http://35.78.82.127:5000/api";
 export const postRequest = async (url , body ) =>
 {
    
